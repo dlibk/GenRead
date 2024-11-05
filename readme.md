@@ -1,3 +1,31 @@
+## Some messages
+
+- To show respect to the author, I forked their original GitHub repository.
+
+## Environment
+
+- You can run `pip install -r requirements.txt` to download the dependencies.
+- I think the only version requirements is to use `openai==0.28.1`. For other packages you may simply use the latest.
+
+## Add API KEY
+- Please put down your HKUST API KEY into an environment variable `HKUST_OPENAI_API_KEY`.
+- If you are using bash, please add `export HKUST_OPENAI_API_KEY="your hkust api key"` to `~/.bash_profile`.
+
+You can obtain your HKUST OPENAI API KEY by [https://itsc.hkust.edu.hk/services/it-infrastructure/azure-openai-api-service](https://itsc.hkust.edu.hk/services/it-infrastructure/azure-openai-api-service),
+
+For normal access via OpenAI, you can add `OPENAI_API_KEY` to environment instead.
+- However, it seems that they are using a very old version of library. I believe this will not work.
+- Please tell me if you want to use the model via OpenAI official platform (instead of HKUST Azure).
+
+## Run Configuration (Zero shot)
+- I uploaded a `trial` split in `indatasets/fm2` for testing.
+- For the explanation please see below.
+- I put some configurations here that you can directly use.
+
+`python mainfunc.py --dataset fm2 --task step1 --split trial --engine gpt-35-turbo`
+
+`python mainfunc.py --dataset fm2 --task step2 --split trial --engine gpt-35-turbo`
+
 ## Code for GenRead: Genrate rather than Retrieve!
 
 ### Introduction & Setup
@@ -6,7 +34,7 @@
 
 - Create an environment and install openai package via `pip install openai`.
 
-- Add your OpenAI API key at `openai.api_key` (line 12) in `inference.py`
+- Add your OpenAI API key at `openai.api_key` (line 12) in `inference.py` (Dongze: Please ignore this line because I changed the way to obtain api key)
 
 ### Download the Datasets
 

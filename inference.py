@@ -1,3 +1,5 @@
+import traceback
+
 import openai
 import os
 import time
@@ -8,8 +10,26 @@ from tqdm import tqdm
 
 from contextlib import contextmanager
 from collections import defaultdict
+import logging
+logger = logging.getLogger(__name__)
 
-openai.api_key = "your openai api key"
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s -%(module)s:  %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S ')
+logger.setLevel(logging.DEBUG)
+
+use_azure = "HKUST_OPENAI_API_KEY" in os.environ
+if use_azure:
+    hkust_openai_api_key = os.environ["HKUST_OPENAI_API_KEY"]
+    openai.api_base = "https://hkust.azure-api.net"
+    openai.api_key = hkust_openai_api_key
+    openai.api_type = "azure"
+    openai.api_version = "2023-05-15"
+else:
+    try:
+        openai.api_key = os.environ["OPENAI_API_KEY"]
+    except KeyError:
+        logger.error("Please set OPENAI_API_KEY environment variable")
+        exit(1)
 
 class TimeoutException(Exception):
     def __init__(self, msg=''):
@@ -67,32 +87,55 @@ def clustering_prompt(items, prompt):
 
 
 def run_embeddings(input_text, engine='text-similarity-davinci-001'):
-    
+    logger.info("running embeddings")
     texts = [t.replace('\n', '') for t in input_text]
     outputs = openai.Embedding.create(input=texts, model=engine)['data']
     embeddings = [o['embedding'] for o in outputs]
+    logger.info("embeddings done")
 
     return embeddings
 
 
 def run_inference(inputs_with_prompts, engine, max_tokens, num_sequence=1, temp=0):
+    logger.info("running inference")
+    logger.debug(f"engine: {engine}")
+    logger.debug(f"inputs_with_prompts: {inputs_with_prompts}")
+    if len(inputs_with_prompts) > 1:
+        logger.error("inputs_with_prompts has more than one input")
+    inputs_with_prompts = inputs_with_prompts[0]
 
     completions = {"choices": []}
     for _ in range(200):
         try:
             with time_limit(20, 'run gpt-3'):
-                completions = openai.Completion.create(
-                    engine=engine, 
-                    max_tokens=max_tokens, 
-                    prompt=inputs_with_prompts, 
-                    temperature=temp, 
-                    n=num_sequence, # num of returned sequence
+                if use_azure:
+                    completions = openai.ChatCompletion.create(
+                        engine=engine,
+                        max_tokens=max_tokens,
+                        messages=[
+                            {"role": "system", "content": "You are a helpful assistant."},
+                            {"role": "user", "content": inputs_with_prompts},
+                        ],
+                        temperature=temp,
+                        n=num_sequence,
                     )
+                else:
+                    completions = openai.Completion.create(
+                        engine=engine,
+                        max_tokens=max_tokens,
+                        prompt=inputs_with_prompts,
+                        temperature=temp,
+                        n=num_sequence, # num of returned sequence
+                        )
                 break
-        except:
-                time.sleep(2)
+        except Exception as e:
+            logger.debug(f"Error when calling run_inference: {traceback.format_exc()}")
+            time.sleep(2)
 
-    outputs = [c["text"] for c in completions["choices"]]
+    if use_azure:
+        outputs = [c["message"]["content"] for c in completions["choices"]]
+    else:
+        outputs = [c["text"] for c in completions["choices"]]
     return outputs
 
 

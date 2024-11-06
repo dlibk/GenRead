@@ -100,25 +100,25 @@ def run_inference(inputs_with_prompts, engine, max_tokens, num_sequence=1, temp=
     logger.info("running inference")
     logger.debug(f"engine: {engine}")
     logger.debug(f"inputs_with_prompts: {inputs_with_prompts}")
-    if len(inputs_with_prompts) > 1:
-        logger.error("inputs_with_prompts has more than one input")
-    inputs_with_prompts = inputs_with_prompts[0]
 
     completions = {"choices": []}
+    outputs = []
     for _ in range(200):
         try:
             with time_limit(20, 'run gpt-3'):
                 if use_azure:
-                    completions = openai.ChatCompletion.create(
-                        engine=engine,
-                        max_tokens=max_tokens,
-                        messages=[
-                            {"role": "system", "content": "You are a helpful assistant."},
-                            {"role": "user", "content": inputs_with_prompts},
-                        ],
-                        temperature=temp,
-                        n=num_sequence,
-                    )
+                    for inputs in inputs_with_prompts:
+                        completions = openai.ChatCompletion.create(
+                            engine=engine,
+                            max_tokens=max_tokens,
+                            messages=[
+                                {"role": "system", "content": "You are a helpful assistant."},
+                                {"role": "user", "content": inputs},
+                            ],
+                            temperature=temp,
+                            n=num_sequence,
+                        )
+                        outputs.extend([c["message"]["content"] for c in completions["choices"]])
                 else:
                     completions = openai.Completion.create(
                         engine=engine,
@@ -131,11 +131,6 @@ def run_inference(inputs_with_prompts, engine, max_tokens, num_sequence=1, temp=
         except Exception as e:
             logger.debug(f"Error when calling run_inference: {traceback.format_exc()}")
             time.sleep(2)
-
-    if use_azure:
-        outputs = [c["message"]["content"] for c in completions["choices"]]
-    else:
-        outputs = [c["text"] for c in completions["choices"]]
     return outputs
 
 

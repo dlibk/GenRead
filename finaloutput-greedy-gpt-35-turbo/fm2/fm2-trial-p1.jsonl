@@ -1,2 +1,0 @@
-{"prompt": "{background} \n\n claim: {query} \n\n Is the claim true or false?"}
-{"question": "The Natural is a book about Roy Hobbs a natural southpaw boxer who goes on to win the heavyweight title from Boom Boom Mancini.", "answer": ["refutes", "no", "false"], "output": ["False. The claim is not true. \"The"]}

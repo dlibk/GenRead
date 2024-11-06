@@ -1,1 +1,0 @@
-{"outputfile": "finaloutput-greedy-gpt-35-turbo/fm2/fm2-trial-p1.jsonl", "prompt": "{background} \n\n claim: {query} \n\n Is the claim true or false?", "accuracy": 1.0, "length": 7.0}

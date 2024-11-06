@@ -104,30 +104,32 @@ def run_inference(inputs_with_prompts, engine, max_tokens, num_sequence=1, temp=
     completions = {"choices": []}
     outputs = []
     for _ in range(200):
+        logger.info("Try to do inference")
         try:
-            with time_limit(20, 'run gpt-3'):
-                if use_azure:
-                    for inputs in inputs_with_prompts:
-                        completions = openai.ChatCompletion.create(
-                            engine=engine,
-                            max_tokens=max_tokens,
-                            messages=[
-                                {"role": "system", "content": "You are a helpful assistant."},
-                                {"role": "user", "content": inputs},
-                            ],
-                            temperature=temp,
-                            n=num_sequence,
-                        )
-                        outputs.extend([c["message"]["content"] for c in completions["choices"]])
-                else:
-                    completions = openai.Completion.create(
+            if use_azure:
+                for inputs in inputs_with_prompts:
+                    completions = openai.ChatCompletion.create(
                         engine=engine,
                         max_tokens=max_tokens,
-                        prompt=inputs_with_prompts,
+                        messages=[
+                            {"role": "system", "content": "You are a helpful assistant."},
+                            {"role": "user", "content": inputs},
+                        ],
                         temperature=temp,
-                        n=num_sequence, # num of returned sequence
-                        )
-                break
+                        n=num_sequence,
+                    )
+                    print(completions["choices"][0]["message"]["content"])
+                    outputs.extend([c["message"]["content"] for c in completions["choices"]])
+                    time.sleep(1)
+            else:
+                completions = openai.Completion.create(
+                    engine=engine,
+                    max_tokens=max_tokens,
+                    prompt=inputs_with_prompts,
+                    temperature=temp,
+                    n=num_sequence, # num of returned sequence
+                    )
+            break
         except Exception as e:
             logger.debug(f"Error when calling run_inference: {traceback.format_exc()}")
             time.sleep(2)

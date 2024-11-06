@@ -103,7 +103,7 @@ def run_inference(inputs_with_prompts, engine, max_tokens, num_sequence=1, temp=
 
     completions = {"choices": []}
     outputs = []
-    for _ in range(200):
+    for _ in range(2):
         logger.info("Try to do inference")
         try:
             if use_azure:

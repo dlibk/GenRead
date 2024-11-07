@@ -64,7 +64,6 @@ def add_prompt(item, prompt):
         backinfo = rmreturn(item['output'][0])
         prompt = prompt.replace('{background}', backinfo)
 
-    print(f"prompt: {prompt}")
     return prompt
 
 

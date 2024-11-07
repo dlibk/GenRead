@@ -64,6 +64,7 @@ def add_prompt(item, prompt):
         backinfo = rmreturn(item['output'][0])
         prompt = prompt.replace('{background}', backinfo)
 
+    print(f"prompt: {prompt}")
     return prompt
 
 
@@ -108,17 +109,23 @@ def run_inference(inputs_with_prompts, engine, max_tokens, num_sequence=1, temp=
         try:
             if use_azure:
                 for inputs in inputs_with_prompts:
+                    prefix, statement = inputs.split("\n\n", 1)
+                    messages = [
+                        {"role": "system", "content": prefix},
+                        {"role": "user", "content": statement},
+                    ],
+                    logger.info(f"Calling GPT with input: {json.dumps(messages)}")
                     completions = openai.ChatCompletion.create(
                         engine=engine,
                         max_tokens=max_tokens,
                         messages=[
-                            {"role": "system", "content": "Generate a background document from Wikipedia to support or refute the statement."},
-                            {"role": "user", "content": inputs},
+                            {"role": "system", "content": prefix},
+                            {"role": "user", "content": statement},
                         ],
                         temperature=temp,
                         n=num_sequence,
                     )
-                    print(completions["choices"][0]["message"]["content"])
+                    print("Response of GPT: " + completions["choices"][0]["message"]["content"])
                     outputs.extend([c["message"]["content"] for c in completions["choices"]])
                     time.sleep(1)
             else:

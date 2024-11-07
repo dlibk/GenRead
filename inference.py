@@ -112,7 +112,7 @@ def run_inference(inputs_with_prompts, engine, max_tokens, num_sequence=1, temp=
                         engine=engine,
                         max_tokens=max_tokens,
                         messages=[
-                            {"role": "system", "content": "You are a helpful assistant."},
+                            {"role": "system", "content": "Generate a background document from Wikipedia to support or refute the statement."},
                             {"role": "user", "content": inputs},
                         ],
                         temperature=temp,

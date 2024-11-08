@@ -1,0 +1,61 @@
+{
+    "configurations": [
+        {
+            "type": "debugpy",
+            "request": "launch",
+            "name": "Launch mainfunc.py",
+            "program": "${workspaceFolder}/mainfunc.py",
+            "args": [
+                "--dataset",
+                "${input:dataset}",
+                "--task",
+                "${input:task}",
+                "--split",
+                "${input:split}",
+                "--engine",
+                "${input:engine}"
+            ],
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ],
+    "inputs": [
+        {
+            "type": "pickString",
+            "id": "dataset",
+            "description": "Select the dataset",
+            "options": [
+                "fm2",
+                "webq"
+            ]
+        },
+        {
+            "type": "pickString",
+            "id": "task",
+            "description": "Select the task",
+            "options": [
+                "step1",
+                "step2"
+            ]
+        },
+        {
+            "type": "pickString",
+            "id": "split",
+            "description": "Select the dataset split",
+            "options": [
+                "train",
+                "dev",
+                "test",
+                "trial"
+            ]
+        },
+        {
+            "type": "pickString",
+            "id": "engine",
+            "description": "Select the engine (e.g., gpt-35-turbo)",
+            "options": [
+                "gpt-35-turbo",
+            ]
+        }
+    ]
+}

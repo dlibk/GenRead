@@ -3,3 +3,4 @@
 {"outputfile": "finaloutput-greedy-gpt-35-turbo/fm2/fm2-trial-p1.jsonl", "prompt": "{background} \n\n claim: {query} \n\n Is the claim true or false?", "accuracy": 0.6, "length": 7.6}
 {"outputfile": "finaloutput-greedy-gpt-35-turbo/fm2/fm2-trial-p1.jsonl", "prompt": "{background} \n\n claim: {query} \n\n Is the claim true or false?", "accuracy": 0.6, "length": 8.2}
 {"outputfile": "finaloutput-greedy-gpt-35-turbo/fm2/fm2-100-p1.jsonl", "prompt": "{background} \n\n claim: {query} \n\n Is the claim true or false?", "accuracy": 0.67, "length": 6.55}
+{"outputfile": "finaloutput-greedy-gpt-35-turbo/fm2/fm2-trial-p1.jsonl", "prompt": "{background} \n\n claim: {query} \n\n Is the claim true or false?", "accuracy": 0.6, "length": 6.8}

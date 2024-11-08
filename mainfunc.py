@@ -27,7 +27,7 @@ def readfiles(infile):
     return lines
 
 
-def step1(dataset, datatype, split, max_tokens, engine, prompt, pid, n, temp):
+def step1(dataset, datatype, split, max_tokens, engine, prompt, pid, n, temp, prefix):
 
     inputfile = f'indatasets/{dataset}/{dataset}-{split}.jsonl'
     inlines = readfiles(inputfile)
@@ -39,7 +39,7 @@ def step1(dataset, datatype, split, max_tokens, engine, prompt, pid, n, temp):
     os.makedirs(outputfolder, exist_ok=True)
     outputfile = f'{outputfolder}/{dataset}-{split}-p{pid}.jsonl'
     
-    run_main(inlines, outputfile, engine, prompt, max_tokens, n, temp)
+    run_main(inlines, outputfile, engine, prompt, max_tokens, n, temp, prefix)
 
     if datatype == 'question answering': ## Eval Recall@K score
         recallfile = f'{outputfolder}/{dataset}-recall@k.jsonl'
@@ -55,7 +55,7 @@ def step1(dataset, datatype, split, max_tokens, engine, prompt, pid, n, temp):
             recallout.write(json.dumps(outmetrics) + '\n')
 
 
-def step2(dataset, datatype, split, max_tokens, engine, prompt, pid):
+def step2(dataset, datatype, split, max_tokens, engine, prompt, pid, prefix):
 
     inputfile = f'backgrounds-greedy-{engine}/{dataset}/{dataset}-{split}-p{pid}.jsonl'
     inlines = readfiles(inputfile)
@@ -64,7 +64,7 @@ def step2(dataset, datatype, split, max_tokens, engine, prompt, pid):
     os.makedirs(outputfolder, exist_ok=True)
     outputfile = f'{outputfolder}/{dataset}-{split}-p{pid}.jsonl'
     
-    run_main(inlines, outputfile, engine, prompt, max_tokens)
+    run_main(inlines, outputfile, engine, prompt, max_tokens, prefix)
 
     if datatype == 'question answering': ## Eval Exact Match
         evalfile = f'{outputfolder}/{dataset}-metrics.jsonl'
@@ -161,14 +161,15 @@ if __name__ == "__main__":
         if line['type'] == datatype and line['task'] == args.task:
             prompt = line['prompt']
             pid = line['pid']
+            prefix = line['prefix']
 
             if args.task == 'step1':
                 outputs = step1(args.dataset, datatype, args.split, max_tokens, args.engine, 
-                    prompt, pid, args.num_sequence, args.temperature)
+                    prompt, pid, args.num_sequence, args.temperature, prefix)
 
             elif args.task == 'step2':
                 outputs = step2(args.dataset, datatype, args.split, 
-                    max_tokens, args.engine, prompt, pid)
+                    max_tokens, args.engine, prompt, pid, prefix)
 
             else:  ## should be either 1 or 2
                 raise NotImplementedError

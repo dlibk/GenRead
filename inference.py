@@ -96,7 +96,7 @@ def run_embeddings(input_text, engine='text-similarity-davinci-001'):
     return embeddings
 
 
-def run_inference(inputs_with_prompts, engine, max_tokens, num_sequence=1, temp=0):
+def run_inference(inputs_with_prompts, engine, max_tokens, num_sequence=1, temp=0, prefix=''):
     logger.info("running inference")
     logger.debug(f"engine: {engine}")
     logger.debug(f"inputs_with_prompts: {inputs_with_prompts}")
@@ -108,10 +108,15 @@ def run_inference(inputs_with_prompts, engine, max_tokens, num_sequence=1, temp=
         try:
             if use_azure:
                 for inputs in inputs_with_prompts:
-                    prefix, statement = inputs.split("\n\n", 1)
+                    # prefix, statement = inputs.split("\n\n", 1)
+                    # messages = [
+                    #     {"role": "system", "content": prefix},
+                    #     {"role": "user", "content": statement},
+                    # ],
+                    inputs = inputs.replace("\n\n", " ")
                     messages = [
                         {"role": "system", "content": prefix},
-                        {"role": "user", "content": statement},
+                        {"role": "user", "content": inputs},
                     ],
                     logger.info(f"Calling GPT with input: {json.dumps(messages)}")
                     completions = openai.ChatCompletion.create(
@@ -119,7 +124,7 @@ def run_inference(inputs_with_prompts, engine, max_tokens, num_sequence=1, temp=
                         max_tokens=max_tokens,
                         messages=[
                             {"role": "system", "content": prefix},
-                            {"role": "user", "content": statement},
+                            {"role": "user", "content": inputs},
                         ],
                         temperature=temp,
                         n=num_sequence,
@@ -142,7 +147,7 @@ def run_inference(inputs_with_prompts, engine, max_tokens, num_sequence=1, temp=
     return outputs
 
 
-def run_main(inlines, outfile, engine, prompt, max_tokens, n=1, temp=0):
+def run_main(inlines, outfile, engine, prompt, max_tokens, prefix='', n=1, temp=0):
 
     if os.path.exists(outfile):
         outs = open(outfile, 'a', encoding='utf8')
@@ -168,7 +173,7 @@ def run_main(inlines, outfile, engine, prompt, max_tokens, n=1, temp=0):
 
         samples = defaultdict(list)
         outputs = run_inference(inputs_with_prompts, 
-            engine, max_tokens, n, temp)
+            engine, max_tokens, n, temp, prefix)
         for j, output in enumerate(outputs):
             samples[j//n].append(output)
 

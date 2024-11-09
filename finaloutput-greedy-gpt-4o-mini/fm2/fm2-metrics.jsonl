@@ -1,0 +1,5 @@
+{"outputfile": "finaloutput-greedy-gpt-4o-mini/fm2/fm2-trial-p1.jsonl", "prompt": "{background} \n\n claim: {query} \n\n Is the claim true or false?", "accuracy": 0.6, "length": 4.6}
+{"outputfile": "finaloutput-greedy-gpt-4o-mini/fm2/fm2-trial-p1.jsonl", "prompt": "{background} \n\n claim: {query} \n\n Is the claim true or false?", "accuracy": 0.7, "length": 4.7}
+{"outputfile": "finaloutput-greedy-gpt-4o-mini/fm2/fm2-trial-p1.jsonl", "prompt": "{background} \n\n claim: {query} \n\n Is the claim true or false? Let's think step by step. \n\n", "accuracy": 0.6, "length": 4.5}
+{"outputfile": "finaloutput-greedy-gpt-4o-mini/fm2/fm2-trial-p1.jsonl", "prompt": "{background} \n\n claim: {query} \n\n Is the claim true or false? \n\n", "accuracy": 0.8, "length": 4.1}
+{"outputfile": "finaloutput-greedy-gpt-4o-mini/fm2/fm2-100-p1.jsonl", "prompt": "{background} \n\n claim: {query} \n\n Is the claim true or false? \n\n", "accuracy": 0.7, "length": 4.18}

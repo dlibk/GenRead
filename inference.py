@@ -96,29 +96,31 @@ def run_embeddings(input_text, engine='text-similarity-davinci-001'):
     return embeddings
 
 
-def run_inference(inputs_with_prompts, engine, max_tokens, num_sequence=1, temp=0, prefix=''):
+def run_inference(inputs_with_prompts, engine, max_tokens, num_sequence=1, temp=0, prefix='', N_backgroud=1):
     logger.info("running inference")
     logger.debug(f"engine: {engine}")
-    logger.debug(f"inputs_with_prompts: {inputs_with_prompts}")
+    # logger.debug(f"inputs_with_prompts: {inputs_with_prompts}")
 
     completions = {"choices": []}
     outputs = []
-    for _ in range(2):
+    # N_backgroud = 2 # number of background info you want to set - Yuan Kangyu
+    try:
         logger.info("Try to do inference")
-        try:
-            if use_azure:
-                for inputs in inputs_with_prompts:
-                    # prefix, statement = inputs.split("\n\n", 1)
-                    # messages = [
-                    #     {"role": "system", "content": prefix},
-                    #     {"role": "user", "content": statement},
-                    # ],
+        if use_azure:
+            for inputs in tqdm(inputs_with_prompts, desc="Inference"):
+                # prefix, statement = inputs.split("\n\n", 1)
+                # messages = [
+                #     {"role": "system", "content": prefix},
+                #     {"role": "user", "content": statement},
+                # ],
+                outputs_for_one_input = ""
+                for _ in range(N_backgroud):
                     inputs = inputs.replace("\n\n", " ")
                     messages = [
                         {"role": "system", "content": prefix},
                         {"role": "user", "content": inputs},
                     ],
-                    logger.info(f"Calling GPT with input: {json.dumps(messages)}")
+                    # logger.info(f"Calling GPT with input: {json.dumps(messages)}")
                     completions = openai.ChatCompletion.create(
                         engine=engine,
                         max_tokens=max_tokens,
@@ -129,37 +131,41 @@ def run_inference(inputs_with_prompts, engine, max_tokens, num_sequence=1, temp=
                         temperature=temp,
                         n=num_sequence,
                     )
-                    print("Response of GPT: " + completions["choices"][0]["message"]["content"])
-                    outputs.extend([c["message"]["content"] for c in completions["choices"]])
+                    # print("Response of GPT: " + completions["choices"][0]["message"]["content"])
+                    # print("Everythign is fine...")
+                    outputs_for_one_input += completions["choices"][0]["message"]["content"] + "\n\n"
                     time.sleep(1)
-            else:
-                completions = openai.Completion.create(
-                    engine=engine,
-                    max_tokens=max_tokens,
-                    prompt=inputs_with_prompts,
-                    temperature=temp,
-                    n=num_sequence, # num of returned sequence
-                    )
-            break
-        except Exception as e:
-            logger.debug(f"Error when calling run_inference: {traceback.format_exc()}")
-            time.sleep(2)
+                outputs.append(outputs_for_one_input)
+        else:
+            completions = openai.Completion.create(
+                engine=engine,
+                max_tokens=max_tokens,
+                prompt=inputs_with_prompts,
+                temperature=temp,
+                n=num_sequence, # num of returned sequence
+                )
+        # break
+    except Exception as e:
+        logger.debug(f"Error when calling run_inference: {traceback.format_exc()}")
+        time.sleep(2)
     return outputs
 
 
-def run_main(inlines, outfile, engine, prompt, max_tokens, prefix='', n=1, temp=0):
+def run_main(inlines, outfile, engine, prompt, max_tokens, prefix='', N_backgroud=1 ,n=1, temp=0):
 
     if os.path.exists(outfile):
         outs = open(outfile, 'a', encoding='utf8')
+        # skip the lines that have been processed, close for development - Yuan Kangyu
         num_lines = len(open(outfile, 'r').readlines())
         inlines = inlines[num_lines - 1: ]
+
     else: # not os.path.exists(outfile)
         outs = open(outfile, 'a', encoding='utf8')
         outs.write(json.dumps({"prompt": prompt}) + '\n')
 
-    pbar = tqdm(total = len(inlines))
+    # pbar = tqdm(total = len(inlines))
     index = 0
-    pbar.update(index)
+    # pbar.update(index)
     while index < len(inlines):
         inputs, answers = [], []
         inputs_with_prompts = []
@@ -173,7 +179,7 @@ def run_main(inlines, outfile, engine, prompt, max_tokens, prefix='', n=1, temp=
 
         samples = defaultdict(list)
         outputs = run_inference(inputs_with_prompts, 
-            engine, max_tokens, n, temp, prefix)
+            engine, max_tokens, n, temp, prefix, N_backgroud)
         for j, output in enumerate(outputs):
             samples[j//n].append(output)
 
@@ -184,7 +190,7 @@ def run_main(inlines, outfile, engine, prompt, max_tokens, prefix='', n=1, temp=
                 'output': samples[i]}) 
                 +'\n')
 
-        pbar.update(len(inputs_with_prompts))
+        # pbar.update(len(inputs_with_prompts))
 
-    pbar.close()
+    # pbar.close()
     outs.close()

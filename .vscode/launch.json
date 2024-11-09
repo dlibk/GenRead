@@ -55,6 +55,7 @@
             "description": "Select the engine (e.g., gpt-35-turbo)",
             "options": [
                 "gpt-35-turbo",
+                "gpt-4o-mini"
             ]
         }
     ]

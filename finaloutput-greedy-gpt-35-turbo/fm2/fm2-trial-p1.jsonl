@@ -1,6 +1,0 @@
-{"prompt": "{background} \n\n claim: {query} \n\n Is the claim true or false?"}
-{"question": "The Natural is a book about Roy Hobbs a natural southpaw boxer who goes on to win the heavyweight title from Boom Boom Mancini.", "answer": ["refutes", "no", "false"], "output": ["False. \"The Natural\" is a novel about"]}
-{"question": "Johnny Depp has been in many successful films, including Black Mass, and is the 10th best paid actor in the world.", "answer": ["supports", "yes", "true"], "output": ["Claim: Johnny Depp has been in many successful"]}
-{"question": "Ken Griffey Jr. was not at his dad's champion games because he had to stay home with a babysitter instead.", "answer": ["refutes", "no", "false"], "output": ["False. There is no evidence to support the claim"]}
-{"question": "The film High Noon subverts gender norms of the time by having the woman rescue the man.", "answer": ["supports", "yes", "true"], "output": ["True."]}
-{"question": "Pedro Alvares Cabral was a nobleman and awarded Knight in the King's Council.", "answer": ["supports", "yes", "true"], "output": ["False. There is no definitive evidence to suggest that"]}

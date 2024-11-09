@@ -27,7 +27,7 @@ def readfiles(infile):
     return lines
 
 
-def step1(dataset, datatype, split, max_tokens, engine, prompt, pid, n, temp, prefix):
+def step1(dataset, datatype, split, max_tokens, engine, prompt, pid, n, temp, prefix, N_backgroud):
 
     inputfile = f'indatasets/{dataset}/{dataset}-{split}.jsonl'
     inlines = readfiles(inputfile)
@@ -39,7 +39,7 @@ def step1(dataset, datatype, split, max_tokens, engine, prompt, pid, n, temp, pr
     os.makedirs(outputfolder, exist_ok=True)
     outputfile = f'{outputfolder}/{dataset}-{split}-p{pid}.jsonl'
     
-    run_main(inlines, outputfile, engine, prompt, max_tokens, prefix, n, temp)
+    run_main(inlines, outputfile, engine, prompt, max_tokens, prefix, N_backgroud, n, temp)
 
     if datatype == 'question answering': ## Eval Recall@K score
         recallfile = f'{outputfolder}/{dataset}-recall@k.jsonl'
@@ -162,10 +162,11 @@ if __name__ == "__main__":
             prompt = line['prompt']
             pid = line['pid']
             prefix = line['prefix']
+            N_backgroud = 2 # number of background info you want to set - Yuan Kangyu
 
             if args.task == 'step1':
                 outputs = step1(args.dataset, datatype, args.split, max_tokens, args.engine, 
-                    prompt, pid, args.num_sequence, args.temperature, prefix)
+                    prompt, pid, args.num_sequence, args.temperature, prefix, N_backgroud)
 
             elif args.task == 'step2':
                 outputs = step2(args.dataset, datatype, args.split, 

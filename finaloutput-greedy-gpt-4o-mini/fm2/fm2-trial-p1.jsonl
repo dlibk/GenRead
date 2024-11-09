@@ -1,0 +1,11 @@
+{"prompt": "{background} \n\n claim: {query} \n\n Is the claim true or false? \n\n"}
+{"question": "The Natural is a book about Roy Hobbs a natural southpaw boxer who goes on to win the heavyweight title from Boom Boom Mancini.", "answer": ["refutes", "no", "false"], "output": ["**Fact-Check Outcome: False**\n\n**Explanation\n\n"]}
+{"question": "Johnny Depp has been in many successful films, including Black Mass, and is the 10th best paid actor in the world.", "answer": ["supports", "yes", "true"], "output": ["**Fact-Check Outcome: True with Clarifications\n\n"]}
+{"question": "Ken Griffey Jr. was not at his dad's champion games because he had to stay home with a babysitter instead.", "answer": ["refutes", "no", "false"], "output": ["**Fact-Check Outcome: False**\n\n**Explanation\n\n"]}
+{"question": "The film High Noon subverts gender norms of the time by having the woman rescue the man.", "answer": ["supports", "yes", "true"], "output": ["**Fact-Check Outcome: False**\n\n**Explanation\n\n"]}
+{"question": "Pedro Alvares Cabral was a nobleman and awarded Knight in the King's Council.", "answer": ["supports", "yes", "true"], "output": ["**Fact-Check Outcome: True**\n\n**Explanation\n\n"]}
+{"question": "There are several theories about which building may have inspired the novel.", "answer": ["supports", "yes", "true"], "output": ["**Fact-Check Outcome: True**\n\n**Explanation\n\n"]}
+{"question": "The Brandenburg Gate was originally called the peace gate.", "answer": ["supports", "yes", "true"], "output": ["**Fact-check Outcome: False**\n\n**Explanation:**\n\n"]}
+{"question": "Goodbye, Mr. Chips' story happens in Canada.", "answer": ["refutes", "no", "false"], "output": ["**Fact-Check Outcome: False**\n\n**Explanation\n\n"]}
+{"question": "Katy Perry's debut album was not successful.", "answer": ["supports", "yes", "true"], "output": ["**Fact-Check Outcome: True**\n\n**Explanation\n\n"]}
+{"question": "Roger Taney was the 10th Supreme Court Justice.", "answer": ["refutes", "no", "false"], "output": ["**Fact-check Outcome: False**\n\n**Explanation:**\n\n"]}

@@ -27,7 +27,7 @@ def readfiles(infile):
     return lines
 
 
-def step1(dataset, datatype, split, max_tokens, engine, prompt, pid, n, temp, prefix, N_backgroud):
+def step1(dataset, datatype, split, max_tokens, engine, prompt, pid, n, temp, prefix, N_backgroud, ai_conf={"engine": "none"}):
 
     inputfile = f'indatasets/{dataset}/{dataset}-{split}.jsonl'
     inlines = readfiles(inputfile)
@@ -39,7 +39,7 @@ def step1(dataset, datatype, split, max_tokens, engine, prompt, pid, n, temp, pr
     os.makedirs(outputfolder, exist_ok=True)
     outputfile = f'{outputfolder}/{dataset}-{split}-p{pid}.jsonl'
     
-    run_main(inlines, outputfile, engine, prompt, max_tokens, prefix, N_backgroud, n, temp)
+    run_main(inlines, outputfile, engine, prompt, max_tokens, prefix, N_backgroud, n, temp, ai_conf)
 
     if datatype == 'question answering': ## Eval Recall@K score
         recallfile = f'{outputfolder}/{dataset}-recall@k.jsonl'
@@ -55,7 +55,7 @@ def step1(dataset, datatype, split, max_tokens, engine, prompt, pid, n, temp, pr
             recallout.write(json.dumps(outmetrics) + '\n')
 
 
-def step2(dataset, datatype, split, max_tokens, engine, prompt, pid, prefix):
+def step2(dataset, datatype, split, max_tokens, engine, prompt, pid, prefix, ai_conf={"engine": "none"}):
 
     inputfile = f'backgrounds-greedy-{engine}/{dataset}/{dataset}-{split}-p{pid}.jsonl'
     inlines = readfiles(inputfile)
@@ -64,7 +64,7 @@ def step2(dataset, datatype, split, max_tokens, engine, prompt, pid, prefix):
     os.makedirs(outputfolder, exist_ok=True)
     outputfile = f'{outputfolder}/{dataset}-{split}-p{pid}.jsonl'
     
-    run_main(inlines, outputfile, engine, prompt, max_tokens, prefix)
+    run_main(inlines, outputfile, engine, prompt, max_tokens, prefix, augment_input_conf=ai_conf)
 
     if datatype == 'question answering': ## Eval Exact Match
         evalfile = f'{outputfolder}/{dataset}-metrics.jsonl'
@@ -129,6 +129,10 @@ if __name__ == "__main__":
     )
     parser.add_argument("--num_sequence", default=1, type=int, required=False)
     parser.add_argument("--temperature", default=0, type=float, required=False)
+    parser.add_argument("--ai_engine", default='none', type=str, required=False,)
+    parser.add_argument("--ai_max_tokens", default=50, type=int, required=False)
+    parser.add_argument("--ai_n", default=1, type=int, required=False)
+    parser.add_argument("--ai_temperature", default=0.8, type=float, required=False)
 
     args = parser.parse_args()
 
@@ -152,6 +156,14 @@ if __name__ == "__main__":
     promptfile = 'cluster' if args.clustering else 'regular'
     promptlines = open(f'inprompts/{promptfile}.jsonl', 'r').readlines()
 
+    ai_conf = {
+        'engine': args.ai_engine,
+        'task': {'question answering':'question','fact checking':'statement','dialogue system':'statement'}[datatype],
+        'max_tokens': args.ai_max_tokens,
+        'num_sequence': args.ai_n,
+        'temp': args.ai_temperature,
+    }
+
     for line in promptlines:
         line = json.loads(line)
 
@@ -166,11 +178,11 @@ if __name__ == "__main__":
 
             if args.task == 'step1':
                 outputs = step1(args.dataset, datatype, args.split, max_tokens, args.engine, 
-                    prompt, pid, args.num_sequence, args.temperature, prefix, N_backgroud)
+                    prompt, pid, args.num_sequence, args.temperature, prefix, N_backgroud, ai_conf)
 
             elif args.task == 'step2':
                 outputs = step2(args.dataset, datatype, args.split, 
-                    max_tokens, args.engine, prompt, pid, prefix)
+                    max_tokens, args.engine, prompt, pid, prefix, ai_conf)
 
             else:  ## should be either 1 or 2
                 raise NotImplementedError

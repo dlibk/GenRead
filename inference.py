@@ -67,6 +67,31 @@ def add_prompt(item, prompt):
     return prompt
 
 
+def augment_input(input, engine='gpt-4o-mini', task='statement', max_tokens=50, num_sequence=1, temp=0.8):
+    outputs = []
+    if use_azure:
+        messages=[
+            {"role": "system", "content": "You are an expert in paraphrasing texts."},
+            {"role": "user", "content": "Restate the following " + task + " with different wordings: " + input['question']},
+        ]
+        logger.info(f"Calling augmented_input with input: {json.dumps(messages)}")
+        completions = openai.ChatCompletion.create(
+            engine=engine,
+            max_tokens=max_tokens,
+            messages=messages,
+            temperature=temp,
+            n=num_sequence,
+        )
+        print(completions["choices"][0]["message"]["content"])
+        for c in completions["choices"]:
+            outputs.append(input.copy())
+            outputs[-1]['question'] = c["message"]["content"]
+        time.sleep(1)
+    else:
+        raise NotImplementedError
+    return outputs
+
+
 def clustering_prompt(items, prompt):
 
     def rmreturn(s):
@@ -151,7 +176,7 @@ def run_inference(inputs_with_prompts, engine, max_tokens, num_sequence=1, temp=
     return outputs
 
 
-def run_main(inlines, outfile, engine, prompt, max_tokens, prefix='', N_backgroud=1 ,n=1, temp=0):
+def run_main(inlines, outfile, engine, prompt, max_tokens, prefix='', N_backgroud=1 ,n=1, temp=0, augment_input_conf={"engine": "none"}):
 
     if os.path.exists(outfile):
         outs = open(outfile, 'a', encoding='utf8')
@@ -166,28 +191,35 @@ def run_main(inlines, outfile, engine, prompt, max_tokens, prefix='', N_backgrou
     # pbar = tqdm(total = len(inlines))
     index = 0
     # pbar.update(index)
+    augment_input_total = (0 if augment_input_conf['engine']=='none' else augment_input_conf['num_sequence'])+1
     while index < len(inlines):
-        inputs, answers = [], []
+        inputs, answers, augmented_inputs = [], [], []
         inputs_with_prompts = []
-        for _ in range(20):
+        for _ in range(20//augment_input_total):
             if index >= len(inlines): break
-            input_with_prompt = add_prompt(inlines[index], prompt)
+            augmented_inputs.append([inlines[index]])
+            if augment_input_conf["engine"] != "none":
+                augmented_inputs[-1].extend(augment_input(inlines[index], **augment_input_conf))
+            for ai in augmented_inputs[-1]:
+                input_with_prompt = add_prompt(ai, prompt)
+                inputs_with_prompts.append(input_with_prompt)
             inputs.append(inlines[index]['question']) ## a string
             answers.append(inlines[index]['answer']) ## a list of strings
-            inputs_with_prompts.append(input_with_prompt)
+            # inputs_with_prompts.append(input_with_prompt)
             index += 1
 
         samples = defaultdict(list)
         outputs = run_inference(inputs_with_prompts, 
             engine, max_tokens, n, temp, prefix, N_backgroud)
         for j, output in enumerate(outputs):
-            samples[j//n].append(output)
+            samples[j//(n*augment_input_total)].append(output)
 
-        for i in range(len(inputs_with_prompts)):
+        for i in range(len(inputs_with_prompts)//augment_input_total):
             outs.write(json.dumps({
                 'question': inputs[i], 
                 'answer': answers[i], 
-                'output': samples[i]}) 
+                'output': samples[i],
+                'augmented_inputs': [ai['question'] for ai in augmented_inputs[i]]}) 
                 +'\n')
 
         # pbar.update(len(inputs_with_prompts))
